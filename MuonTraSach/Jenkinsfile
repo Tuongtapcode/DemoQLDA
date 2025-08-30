@@ -2,27 +2,10 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
-                // Với "Pipeline script from SCM", stage này có thể bỏ,
-                // vì Jenkins đã tự checkout repo trước đó.
-                checkout scm
+                echo "🚀 Repo đã checkout thành công, giờ có thể build."
             }
-        }
-
-        stage('Build (skip for now)') {
-            steps {
-                echo "⏭️ Skipping Docker build & push (Docker chưa kết nối Jenkins)."
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Pipeline chạy thành công (chưa build Docker).'
-        }
-        failure {
-            echo '❌ Pipeline thất bại!'
         }
     }
 }
