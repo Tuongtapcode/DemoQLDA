@@ -1,389 +1,117 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Sách</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+{% extends "layout/base.html" %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="javascript:void(0)">MƯỢN SÁCH TRỰC TUYẾN</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mynavbar">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="javascript:void(0)">Link</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="javascript:void(0)">Link</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="javascript:void(0)">Link</a>
-        </li>
-      </ul>
-      <form class="d-flex">
-        <input class="form-control me-2" type="text" placeholder="Search">
-        <button class="btn btn-primary" type="button">Search</button>
-      </form>
-    </div>
-  </div>
-</nav>
-<div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-800 mb-2">📚 Quản Lý Sách</h1>
-        <p class="text-gray-600">Hệ thống quản lý thư viện cá nhân</p>
-    </div>
+{% block title %}Trang chủ - Người dùng{% endblock %}
 
-    <!-- Add Book Form -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Thêm Sách Mới</h2>
-        <form id="bookForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tên Sách</label>
-                <input type="text" id="bookTitle"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="Nhập tên sách..." required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tác Giả</label>
-                <input type="text" id="bookAuthor"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="Nhập tên tác giả..." required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Thể Loại</label>
-                <select id="bookCategory"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required>
-                    <option value="">Chọn thể loại</option>
-                    <option value="Văn học">Văn học</option>
-                    <option value="Khoa học">Khoa học</option>
-                    <option value="Lịch sử">Lịch sử</option>
-                    <option value="Kinh tế">Kinh tế</option>
-                    <option value="Công nghệ">Công nghệ</option>
-                    <option value="Tâm lý">Tâm lý</option>
-                    <option value="Khác">Khác</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Năm Xuất Bản</label>
-                <input type="number" id="bookYear"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="2024" min="1900" max="2024" required>
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Mô Tả</label>
-                <textarea id="bookDescription"
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          rows="3" placeholder="Mô tả ngắn về cuốn sách..."></textarea>
-            </div>
-            <div class="md:col-span-2">
-                <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200 transform hover:scale-105">
-                    ➕ Thêm Sách
-                </button>
-            </div>
-        </form>
-    </div>
+{% block nav_links %}
+<span class="navbar-text me-3">
+    <i class="fas fa-user me-1"></i>Chào {{ username }}
+</span>
+<a class="nav-link" href="/logout">
+    <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+</a>
+{% endblock %}
 
-    <!-- Search and Filter -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <div class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1">
-                <input type="text" id="searchInput"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="🔍 Tìm kiếm sách theo tên hoặc tác giả...">
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-circle me-2"></i>Chào mừng Người dùng: {{ username }}
+                </h5>
             </div>
-            <div>
-                <select id="filterCategory"
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Tất cả thể loại</option>
-                    <option value="Văn học">Văn học</option>
-                    <option value="Khoa học">Khoa học</option>
-                    <option value="Lịch sử">Lịch sử</option>
-                    <option value="Kinh tế">Kinh tế</option>
-                    <option value="Công nghệ">Công nghệ</option>
-                    <option value="Tâm lý">Tâm lý</option>
-                    <option value="Khác">Khác</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- Books List -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800">Danh Sách Sách</h2>
-            <span id="bookCount" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">0 cuốn sách</span>
-        </div>
-        <div id="booksList" class="space-y-4">
-            <div class="text-center py-12 text-gray-500">
-                <div class="text-6xl mb-4">📖</div>
-                <p class="text-lg">Chưa có sách nào. Hãy thêm sách đầu tiên!</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Modal -->
-<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-        <h3 class="text-xl font-semibold text-gray-800 mb-4">Chỉnh Sửa Sách</h3>
-        <form id="editForm" class="space-y-4">
-            <input type="hidden" id="editBookId">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tên Sách</label>
-                <input type="text" id="editBookTitle"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tác Giả</label>
-                <input type="text" id="editBookAuthor"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Thể Loại</label>
-                <select id="editBookCategory"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required>
-                    <option value="Văn học">Văn học</option>
-                    <option value="Khoa học">Khoa học</option>
-                    <option value="Lịch sử">Lịch sử</option>
-                    <option value="Kinh tế">Kinh tế</option>
-                    <option value="Công nghệ">Công nghệ</option>
-                    <option value="Tâm lý">Tâm lý</option>
-                    <option value="Khác">Khác</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Năm Xuất Bản</label>
-                <input type="number" id="editBookYear"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       min="1900" max="2024" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Mô Tả</label>
-                <textarea id="editBookDescription"
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          rows="3"></textarea>
-            </div>
-            <div class="flex gap-3 pt-4">
-                <button type="submit"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition duration-200">
-                    Cập Nhật
-                </button>
-                <button type="button" onclick="closeEditModal()"
-                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 rounded-lg transition duration-200">
-                    Hủy
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    let books = [];
-    let nextId = 1;
-
-    // Load books from localStorage
-    function loadBooks() {
-        const savedBooks = localStorage.getItem('books');
-        if (savedBooks) {
-            books = JSON.parse(savedBooks);
-            nextId = Math.max(...books.map(book => book.id), 0) + 1;
-        }
-        displayBooks();
-    }
-
-    // Save books to localStorage
-    function saveBooks() {
-        localStorage.setItem('books', JSON.stringify(books));
-    }
-
-    // Add new book
-    document.getElementById('bookForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const newBook = {
-            id: nextId++,
-            title: document.getElementById('bookTitle').value,
-            author: document.getElementById('bookAuthor').value,
-            category: document.getElementById('bookCategory').value,
-            year: parseInt(document.getElementById('bookYear').value),
-            description: document.getElementById('bookDescription').value,
-            dateAdded: new Date().toLocaleDateString('vi-VN')
-        };
-
-        books.push(newBook);
-        saveBooks();
-        displayBooks();
-        this.reset();
-
-        // Show success message
-        showNotification('Đã thêm sách thành công! 📚', 'success');
-    });
-
-    // Display books
-    function displayBooks(booksToShow = books) {
-        const booksList = document.getElementById('booksList');
-        const bookCount = document.getElementById('bookCount');
-
-        bookCount.textContent = `${booksToShow.length} cuốn sách`;
-
-        if (booksToShow.length === 0) {
-            booksList.innerHTML = `
-                <div class="text-center py-12 text-gray-500">
-                    <div class="text-6xl mb-4">📖</div>
-                    <p class="text-lg">Không tìm thấy sách nào.</p>
-                </div>
-            `;
-            return;
-        }
-
-        booksList.innerHTML = booksToShow.map(book => `
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
-                <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-1">${book.title}</h3>
-                        <p class="text-gray-600 mb-2">👤 ${book.author}</p>
-                        <div class="flex flex-wrap gap-2 mb-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">${book.category}</span>
-<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">📅 ${book.year}</span>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Tìm kiếm sách -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body text-center">
+                                <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">Tìm kiếm sách</h5>
+                                <p class="card-text">Tìm kiếm sách trong thư viện</p>
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Tìm kiếm
+                                </button>
+                            </div>
                         </div>
-                        ${book.description ? `<p class="text-gray-600 text-sm mb-2">${book.description}</p>` : ''}
-                        <p class="text-xs text-gray-500">Thêm vào: ${book.dateAdded}</p>
                     </div>
-                    <div class="flex gap-2 ml-4">
-                        <button onclick="editBook(${book.id})" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition duration-200">
-                            ✏️ Sửa
-                        </button>
-                        <button onclick="deleteBook(${book.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-200">
-                            🗑️ Xóa
-                        </button>
+                    
+                    <!-- Lịch sử mượn -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-info">
+                            <div class="card-body text-center">
+                                <i class="fas fa-history fa-3x text-info mb-3"></i>
+                                <h5 class="card-title">Lịch sử mượn sách</h5>
+                                <p class="card-text">Xem lịch sử mượn trả sách</p>
+                                <button class="btn btn-info">
+                                    <i class="fas fa-history me-2"></i>Xem lịch sử
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin tài khoản -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Thông tin tài khoản</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <strong>Tên đăng nhập:</strong> {{ username }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Vai trò:</strong> <span class="badge bg-success">Người dùng</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Sách đang mượn:</strong> 2 cuốn
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sách đang mượn -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6>Sách đang mượn</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Mã sách</th>
+                                        <th>Tên sách</th>
+                                        <th>Ngày mượn</th>
+                                        <th>Ngày hẹn trả</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>S001</td>
+                                        <td>Python cơ bản</td>
+                                        <td>15/08/2025</td>
+                                        <td>29/08/2025</td>
+                                        <td><span class="badge bg-success">Đang mượn</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>S002</td>
+                                        <td>HTML & CSS</td>
+                                        <td>20/08/2025</td>
+                                        <td>25/08/2025</td>
+                                        <td><span class="badge bg-warning">Sắp hết hạn</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        `).join('');
-    }
-
-    // Delete book
-    function deleteBook(id) {
-        if (confirm('Bạn có chắc chắn muốn xóa cuốn sách này?')) {
-            books = books.filter(book => book.id !== id);
-            saveBooks();
-            displayBooks();
-            showNotification('Đã xóa sách thành công! 🗑️', 'success');
-        }
-    }
-
-    // Edit book
-    function editBook(id) {
-        const book = books.find(book => book.id === id);
-        if (book) {
-            document.getElementById('editBookId').value = book.id;
-            document.getElementById('editBookTitle').value = book.title;
-            document.getElementById('editBookAuthor').value = book.author;
-            document.getElementById('editBookCategory').value = book.category;
-            document.getElementById('editBookYear').value = book.year;
-            document.getElementById('editBookDescription').value = book.description || '';
-
-            document.getElementById('editModal').classList.remove('hidden');
-            document.getElementById('editModal').classList.add('flex');
-        }
-    }
-
-    // Close edit modal
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-        document.getElementById('editModal').classList.remove('flex');
-    }
-
-    // Update book
-    document.getElementById('editForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const id = parseInt(document.getElementById('editBookId').value);
-        const bookIndex = books.findIndex(book => book.id === id);
-
-        if (bookIndex !== -1) {
-            books[bookIndex] = {
-                ...books[bookIndex],
-                title: document.getElementById('editBookTitle').value,
-author: document.getElementById('editBookAuthor').value,
-                category: document.getElementById('editBookCategory').value,
-                year: parseInt(document.getElementById('editBookYear').value),
-                description: document.getElementById('editBookDescription').value
-            };
-
-            saveBooks();
-            displayBooks();
-            closeEditModal();
-            showNotification('Đã cập nhật sách thành công! ✅', 'success');
-        }
-    });
-
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', filterBooks);
-    document.getElementById('filterCategory').addEventListener('change', filterBooks);
-
-    function filterBooks() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const categoryFilter = document.getElementById('filterCategory').value;
-
-        let filteredBooks = books.filter(book => {
-            const matchesSearch = book.title.toLowerCase().includes(searchTerm) ||
-                                book.author.toLowerCase().includes(searchTerm);
-            const matchesCategory = !categoryFilter || book.category === categoryFilter;
-
-            return matchesSearch && matchesCategory;
-        });
-
-        displayBooks(filteredBooks);
-    }
-
-    // Show notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 transform transition-all duration-300 ${
-            type === 'success' ? 'bg-green-500' : 'bg-blue-500'
-        }`;
-        notification.textContent = message;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('editModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeEditModal();
-        }
-    });
-
-    // Initialize
-    loadBooks();
-</script>
-<script>
-    (function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97309bf56518fd29',t:'MTc1NTg0NzI0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
-</script>
-</body>
-</html>
+        </div>
+    </div>
+</div>
+{% endblock %}

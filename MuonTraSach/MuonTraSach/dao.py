@@ -1,6 +1,8 @@
 import json, os
 
-
+#
+# Không Phân quyền (Lấy file k có role)
+#
 
 def auth_user(username, password):
     base_dir = os.path.dirname(__file__)
@@ -9,13 +11,27 @@ def auth_user(username, password):
         users = json.load(f)
         for u in users:
             if u["username"] == username and u["password"] == password:
-                return True
+                return u
+    return None
 
 
-    return False
 
+
+#
+# Phân quyền (Lấy file có role)
+#
+#
+# def auth_user(username, password):
+#     base_dir = os.path.dirname(__file__)
+#     file_path = os.path.join(base_dir, "data", "user_role.json")
+#     with open(file_path, encoding="utf8") as f:
+#         users = json.load(f)
+#         for u in users:
+#             if u["username"] == username and u["password"] == password:
+#                 return u
+#     return None
 
 
 
 if __name__ == '__main__':
-    print(auth_user("user1", 2))
+    print(auth_user("admin", "1"))
