@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
+        IMAGE_NAME = 'tuongtapcode/demoqlda'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,19 +14,50 @@ pipeline {
             }
         }
 
-        stage('Build (skip for now)') {
+        stage('Build Docker Image') {
             steps {
-                echo "⏭️ Skipping Docker build & push (Docker chưa kết nối Jenkins)."
+                dir('MuonTraSach') {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+            }
+        }
+
+        stage('Push to DockerHub') {
+            when {
+                branch 'main'
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${IMAGE_NAME}:latest
+                    """
+                }
             }
         }
     }
 
     post {
+        always {
+            echo 'Cleaning up Docker resources...'
+            sh '''
+                docker system prune -f || true
+                docker container prune -f || true
+            '''
+        }
         success {
-            echo '✅ Pipeline chạy thành công (chưa build Docker).'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo '❌ Pipeline thất bại!'
+            echo '❌ Pipeline failed!'
         }
     }
 }
