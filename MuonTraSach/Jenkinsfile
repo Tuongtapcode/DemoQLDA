@@ -1,7 +1,7 @@
 pipeline {
     agent any
     options {
-        skipDefaultCheckout(true)  // ❌ tắt checkout mặc định
+        skipDefaultCheckout(true) // tắt checkout mặc định
     }
 
     environment {
@@ -13,7 +13,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+                // Dùng lại repo Jenkins đã clone
+                checkout scm
+                sh 'ls -la'
             }
         }
 
@@ -51,10 +53,8 @@ pipeline {
         always {
             echo 'Cleaning up Docker resources...'
             script {
-                node {
-                    sh 'docker system prune -f || true'
-                    sh 'docker container prune -f || true'
-                }
+                sh 'docker system prune -f || true'
+                sh 'docker container prune -f || true'
             }
         }
         success {
