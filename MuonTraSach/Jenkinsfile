@@ -3,23 +3,29 @@ pipeline {
 
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
-        IMAGE_NAME = 'nguyentuong/demoqlda'
+        IMAGE_NAME = 'tuongtapcode/demoqlda'
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 dir('MuonTraSach') {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                    bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
                 }
             }
         }
 
         stage('Test Application') {
             steps {
-                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                bat "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
             }
         }
 
@@ -28,12 +34,11 @@ pipeline {
                 branch 'main'
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh """
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${IMAGE_NAME}:latest
-                    """
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("${IMAGE_NAME}:latest").push()
+                    }
                 }
             }
         }
@@ -42,10 +47,8 @@ pipeline {
     post {
         always {
             echo 'Cleaning up Docker resources...'
-            sh '''
-                docker system prune -f || true
-                docker container prune -f || true
-            '''
+            bat 'docker system prune -f || true'
+            bat 'docker container prune -f || true'
         }
         success {
             echo '✅ Pipeline completed successfully!'
