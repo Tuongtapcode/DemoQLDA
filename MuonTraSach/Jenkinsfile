@@ -1,64 +1,26 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
-        IMAGE_NAME = 'tuongtapcode/demoqlda'
-        IMAGE_TAG = "${BUILD_NUMBER}"
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                // Dùng SCM mà Jenkins đã checkout sẵn
-                checkout scm
-                sh 'ls -la'
+                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build (skip for now)') {
             steps {
-                dir('MuonTraSach') {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
-                }
-            }
-        }
-
-        stage('Test Application') {
-            steps {
-                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
-            }
-        }
-
-        stage('Push to DockerHub') {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
-                        docker.image("${IMAGE_NAME}:latest").push()
-                    }
-                }
+                echo "⏭️ Skipping Docker build & push (Docker chưa kết nối Jenkins)."
             }
         }
     }
 
     post {
-        always {
-            echo 'Cleaning up Docker resources...'
-            script {
-                sh 'docker system prune -f || true'
-                sh 'docker container prune -f || true'
-            }
-        }
         success {
-            echo '✅ Pipeline completed successfully!'
+            echo '✅ Pipeline chạy thành công (chưa build Docker).'
         }
         failure {
-            echo '❌ Pipeline failed!'
+            echo '❌ Pipeline thất bại!'
         }
     }
 }
