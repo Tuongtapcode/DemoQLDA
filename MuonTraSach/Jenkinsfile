@@ -8,12 +8,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 dir('MuonTraSach') {
