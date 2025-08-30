@@ -10,17 +10,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                sh '''
-                    rm -rf DemoQLDA
-                    git clone -b main https://github.com/Tuongtapcode/DemoQLDA.git
-                    ls -la DemoQLDA
-                '''
+                // Dùng SCM mà Jenkins đã checkout sẵn
+                checkout scm
+                sh 'ls -la'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                dir('DemoQLDA/MuonTraSach') {
+                dir('MuonTraSach') {
                     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
                     sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
                 }
