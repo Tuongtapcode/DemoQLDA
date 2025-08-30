@@ -44,17 +44,21 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            echo 'Cleaning up Docker resources...'
-            bat 'docker system prune -f || true'
-            bat 'docker container prune -f || true'
-        }
-        success {
-            echo '✅ Pipeline completed successfully!'
-        }
-        failure {
-            echo '❌ Pipeline failed!'
+post {
+    always {
+        echo 'Cleaning up Docker resources...'
+        script {
+            node {
+                bat 'docker system prune -f || true'
+                bat 'docker container prune -f || true'
+            }
         }
     }
+    success {
+        echo '✅ Pipeline completed successfully!'
+    }
+    failure {
+        echo '❌ Pipeline failed!'
+    }
+}
 }
