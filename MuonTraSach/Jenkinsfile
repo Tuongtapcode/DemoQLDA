@@ -8,4 +8,13 @@ pipeline {
             }
         }
     }
+
+    post {
+        success {
+            echo '✅ Pipeline chạy thành công.'
+        }
+        failure {
+            echo '❌ Pipeline thất bại!'
+        }
+    }
 }
