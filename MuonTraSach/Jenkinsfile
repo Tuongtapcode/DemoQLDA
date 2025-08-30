@@ -2,9 +2,23 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                // Lúc này Jenkins đã clone repo sẵn,
+                // nhưng thêm checkout scm để chắc chắn đồng bộ code
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
                 echo "🚀 Repo đã checkout thành công, giờ có thể build."
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo "🧪 Chạy test (bổ sung sau)."
             }
         }
     }
