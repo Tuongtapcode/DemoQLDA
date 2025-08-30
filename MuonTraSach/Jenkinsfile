@@ -33,7 +33,7 @@ pipeline {
         stage('Test Application') {
             steps {
                 dir('MuonTraSach') {
-                    sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                    sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover -s MuonTraSach/tests"
                 }
             }
         }
