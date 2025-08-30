@@ -37,9 +37,6 @@ def index():
 
 
 
-
-
-
 #
 # Phân quyền
 #

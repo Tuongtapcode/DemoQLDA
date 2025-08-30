@@ -2,54 +2,99 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "muontrasach"
-        CONTAINER_NAME = "muontrasach"
-        PORT = "5000"
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        RENDER_API_KEY = credentials('render-api-key')
+        IMAGE_NAME = 'tuongtapcode/demoqlda'  // Thay đổi username DockerHub của bạn
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        RENDER_SERVICE_ID = 'your-render-service-id'  // Sẽ get từ Render
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo "Checkout code từ GitHub"
-                git branch: 'main', url: 'https://github.com/username/MuonTraSach.git'
+                echo 'Checking out code from GitHub...'
+                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "Build Docker image cho Flask app"
-                sh "docker build -t ${IMAGE_NAME} ."
+                echo 'Building Docker image...'
+                dir('MuonTraSach') {
+                    script {
+                        def image = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                        docker.build("${IMAGE_NAME}:latest")
+                    }
+                }
             }
         }
 
-        stage('Stop old Container') {
+        stage('Test Application') {
             steps {
-                echo "Dừng container cũ nếu có"
-                sh "docker rm -f ${CONTAINER_NAME} || true"
+                echo 'Running application tests...'
+                script {
+                    // Chạy unit tests
+                    sh """
+                        docker run --rm -v \$(pwd)/MuonTraSach:/app ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover tests/
+                    """
+
+                    // Test container có chạy được không
+                    sh """
+                        docker run --rm -d --name test-container -p 5001:5000 ${IMAGE_NAME}:${IMAGE_TAG}
+                        sleep 10
+                        curl -f http://localhost:5001/login || exit 1
+                        docker stop test-container
+                    """
+                }
             }
         }
 
-        stage('Deploy Container') {
+        stage('Push to DockerHub') {
+            when {
+                branch 'main'
+            }
             steps {
-                echo "Chạy container mới"
-                sh "docker run -d --name ${CONTAINER_NAME} -p ${PORT}:5000 ${IMAGE_NAME}"
+                echo 'Pushing to DockerHub...'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("${IMAGE_NAME}:latest").push()
+                    }
+                }
             }
         }
 
-        stage('Test Deployment') {
+        stage('Deploy to Render') {
+            when {
+                branch 'main'
+            }
             steps {
-                echo "Kiểm tra Flask app"
-                sh "curl -f http://localhost:${PORT} || exit 1"
+                echo 'Deploying to Render...'
+                script {
+                    sh """
+                        curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \\
+                        -H "Authorization: Bearer ${RENDER_API_KEY}" \\
+                        -H "Content-Type: application/json" \\
+                        -d '{"clearCache": false}'
+                    """
+                }
             }
         }
     }
 
     post {
+        always {
+            echo 'Cleaning up...'
+            sh '''
+                docker system prune -f
+                docker container prune -f
+            '''
+        }
         success {
-            echo "✅ Deployment thành công! Truy cập http://localhost:${PORT}"
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo "❌ Deployment thất bại!"
+            echo '❌ Pipeline failed!'
         }
     }
 }

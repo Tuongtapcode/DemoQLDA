@@ -13,5 +13,8 @@ RUN pip install -r requirements.txt
 # Copy toàn bộ source code (thư mục MuonTraSach) vào container
 COPY MuonTraSach .
 
+# Expose port 5000
+EXPOSE 5000
+
 # Chạy app khi container khởi động
 CMD ["python", "index.py"]
