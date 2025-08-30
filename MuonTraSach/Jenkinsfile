@@ -49,8 +49,11 @@ post {
         echo 'Cleaning up Docker resources...'
         script {
             node {
-                bat 'docker system prune -f || true'
-                bat 'docker container prune -f || true'
+                bat '''
+                docker system prune -f
+                docker container prune -f
+                exit 0
+                '''
             }
         }
     }
@@ -61,4 +64,5 @@ post {
         echo '❌ Pipeline failed!'
     }
 }
+
 }
