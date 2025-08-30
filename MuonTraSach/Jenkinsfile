@@ -4,7 +4,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+                // Với "Pipeline script from SCM", stage này có thể bỏ,
+                // vì Jenkins đã tự checkout repo trước đó.
+                checkout scm
             }
         }
 
