@@ -10,7 +10,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+                // Bước checkout Git, đảm bảo chạy trong node
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'main']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+                    ]]
+                ])
             }
         }
 
@@ -25,7 +32,9 @@ pipeline {
 
         stage('Test Application') {
             steps {
-                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                dir('MuonTraSach') {
+                    sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                }
             }
         }
 
