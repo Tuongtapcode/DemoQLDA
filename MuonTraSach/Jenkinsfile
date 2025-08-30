@@ -1,7 +1,16 @@
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout(true)  // 👈 không cho Jenkins auto-checkout
+    }
 
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+            }
+        }
+
         stage('Hello') {
             steps {
                 echo '✅ Jenkins pipeline is working!'
