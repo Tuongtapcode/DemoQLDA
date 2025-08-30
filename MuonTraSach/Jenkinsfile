@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Credentials ID trong Jenkins phải trùng
+        // ID credentials DockerHub trong Jenkins
         DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
         IMAGE_NAME = 'tuongtapcode/demoqlda'
         IMAGE_TAG = "${BUILD_NUMBER}"
@@ -17,16 +17,20 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir('MuonTraSach') {
-                    bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                node {
+                    dir('MuonTraSach') {
+                        bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                        bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                    }
                 }
             }
         }
 
         stage('Test Application') {
             steps {
-                bat "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                node {
+                    bat "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                }
             }
         }
 
@@ -35,11 +39,12 @@ pipeline {
                 branch 'main'
             }
             steps {
-                script {
-                    // Dùng credentials đã khai báo
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
-                        docker.image("${IMAGE_NAME}:latest").push()
+                node {
+                    script {
+                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                            docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                            docker.image("${IMAGE_NAME}:latest").push()
+                        }
                     }
                 }
             }
@@ -48,8 +53,11 @@ pipeline {
 
     post {
         always {
-            bat 'docker system prune -f || true'
-            bat 'docker container prune -f || true'
+            node {
+                echo 'Cleaning up Docker resources...'
+                bat 'docker system prune -f || true'
+                bat 'docker container prune -f || true'
+            }
         }
         success {
             echo '✅ Pipeline completed successfully!'
