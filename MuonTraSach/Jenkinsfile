@@ -1,32 +1,63 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
+        IMAGE_NAME = 'tuongtapcode/demoqlda'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo "🚀 Repo đã checkout thành công, giờ có thể build."
+                dir('MuonTraSach') {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                }
             }
         }
 
-        stage('Test') {
+        stage('Test Application') {
             steps {
-                echo "🧪 Chạy test (bổ sung sau)."
+                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+            }
+        }
+
+        stage('Push to DockerHub') {
+            when {
+                branch 'main'
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${IMAGE_NAME}:latest
+                    """
+                }
             }
         }
     }
 
     post {
+        always {
+            echo 'Cleaning up Docker resources...'
+            sh '''
+                docker system prune -f || true
+                docker container prune -f || true
+            '''
+        }
         success {
-            echo '✅ Pipeline chạy thành công.'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo '❌ Pipeline thất bại!'
+            echo '❌ Pipeline failed!'
         }
     }
 }
