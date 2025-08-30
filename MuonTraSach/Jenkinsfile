@@ -1,9 +1,15 @@
 pipeline {
     agent any
 
+    options {
+        // Ngăn Jenkins tự checkout lần nữa
+        skipDefaultCheckout(true)
+    }
+
     stages {
         stage('Checkout') {
             steps {
+                // Tự checkout thủ công
                 git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
             }
         }
