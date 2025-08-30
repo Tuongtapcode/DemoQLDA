@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        // Credentials ID trong Jenkins phải trùng
         DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
         IMAGE_NAME = 'tuongtapcode/demoqlda'
         IMAGE_TAG = "${BUILD_NUMBER}"
@@ -17,15 +18,15 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('MuonTraSach') {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                    bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
                 }
             }
         }
 
         stage('Test Application') {
             steps {
-                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                bat "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
             }
         }
 
@@ -35,6 +36,7 @@ pipeline {
             }
             steps {
                 script {
+                    // Dùng credentials đã khai báo
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
                         docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
                         docker.image("${IMAGE_NAME}:latest").push()
@@ -46,8 +48,8 @@ pipeline {
 
     post {
         always {
-            sh 'docker system prune -f || true'
-            sh 'docker container prune -f || true'
+            bat 'docker system prune -f || true'
+            bat 'docker container prune -f || true'
         }
         success {
             echo '✅ Pipeline completed successfully!'
