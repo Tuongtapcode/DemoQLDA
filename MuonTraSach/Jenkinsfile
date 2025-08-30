@@ -17,15 +17,15 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('MuonTraSach') {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                    bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
                 }
             }
         }
 
         stage('Test Application') {
             steps {
-                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+                bat "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
             }
         }
 
@@ -44,16 +44,21 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            sh 'docker system prune -f || true'
-            sh 'docker container prune -f || true'
-        }
-        success {
-            echo '✅ Pipeline completed successfully!'
-        }
-        failure {
-            echo '❌ Pipeline failed!'
+post {
+    always {
+        echo 'Cleaning up Docker resources...'
+        script {
+            node {
+                bat 'docker system prune -f || true'
+                bat 'docker container prune -f || true'
+            }
         }
     }
+    success {
+        echo '✅ Pipeline completed successfully!'
+    }
+    failure {
+        echo '❌ Pipeline failed!'
+    }
+}
 }
