@@ -2,31 +2,58 @@ pipeline {
     agent any
 
     environment {
-        GIT_REPO_URL = 'https://github.com/Tuongtapcode/DemoQLDA.git'
-        GIT_BRANCH = 'main'
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
+        IMAGE_NAME = 'tuongtapcode/demoqlda'
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                deleteDir()
-                git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
+                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
             }
         }
 
-        stage('Build (skip for now)') {
+        stage('Build Docker Image') {
             steps {
-                echo "⏭️ Skipping Docker build & push (Docker chưa kết nối Jenkins)."
+                dir('MuonTraSach') {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover"
+            }
+        }
+
+        stage('Push to DockerHub') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                        docker.image("${IMAGE_NAME}:latest").push()
+                    }
+                }
             }
         }
     }
 
     post {
+        always {
+            sh 'docker system prune -f || true'
+            sh 'docker container prune -f || true'
+        }
         success {
-            echo '✅ Pipeline chạy thành công (chưa build Docker).'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo '❌ Pipeline thất bại!'
+            echo '❌ Pipeline failed!'
         }
     }
 }
