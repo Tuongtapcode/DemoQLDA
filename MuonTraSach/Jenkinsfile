@@ -4,8 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout repo GitHub
-                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+                checkout scm
             }
         }
 
