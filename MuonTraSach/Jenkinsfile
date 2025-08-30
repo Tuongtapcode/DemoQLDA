@@ -2,6 +2,13 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                // Checkout repo GitHub
+                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo "🚀 Repo đã checkout thành công, giờ có thể build."
