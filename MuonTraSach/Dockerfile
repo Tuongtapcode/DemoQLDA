@@ -1,20 +1,18 @@
-# Dùng Python base image
+# Base image
 FROM python:3.10-slim
 
-# Tạo thư mục làm việc trong container
+# Set working directory
 WORKDIR /app
 
-# Copy file requirements.txt vào container
-COPY requirements.txt requirements.txt
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Cài thư viện cần thiết
-RUN pip install -r requirements.txt
+# Copy source code (cả thư mục MuonTraSach con)
+COPY MuonTraSach ./MuonTraSach
 
-# Copy toàn bộ source code (thư mục MuonTraSach) vào container
-COPY MuonTraSach .
-
-# Expose port 5000
+# Expose port
 EXPOSE 5000
 
-# Chạy app khi container khởi động
-CMD ["python", "index.py"]
+# Run app
+CMD ["python", "MuonTraSach/index.py"]

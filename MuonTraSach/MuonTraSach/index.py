@@ -21,7 +21,7 @@ def login():
             session["username"] = user["username"]
             return redirect(url_for("index"))
         else:
-            error = "Sai tên đăng nhập hoặc mật khẩu!"
+            error = "Sai tên đăng nhập hoặc mật khẩu rồi!"
 
     return render_template("login.html", error=error)
 
@@ -31,10 +31,6 @@ def index():
     if "username" in session:   # nếu đã đăng nhập
         return render_template("index.html", username=session["username"])
     return redirect(url_for("login"))
-
-
-
-
 
 
 #
