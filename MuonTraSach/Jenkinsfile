@@ -1,10 +1,19 @@
 pipeline {
     agent any
 
+    environment {
+        GIT_REPO_URL = 'https://github.com/Tuongtapcode/DemoQLDA.git'
+        GIT_BRANCH = 'main'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+                // Xóa workspace trước khi checkout để tránh lỗi repo hỏng
+                deleteDir()
+
+                // Checkout repo public
+                git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
             }
         }
 
