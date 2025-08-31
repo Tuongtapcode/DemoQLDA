@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials')
         IMAGE_NAME = 'nguyentuong/demoqlda'
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
@@ -10,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Bước checkout Git, đảm bảo chạy trong node
+                // Checkout source code từ GitHub
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: 'main']],
@@ -38,23 +37,27 @@ pipeline {
             }
         }
 
-        stage('Push to DockerHub') {
-            when {
-                branch 'main'
-            }
+        stage('Docker Login & Push') {
+            when { branch 'main' }
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
-                        docker.image("${IMAGE_NAME}:latest").push()
-                    }
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    // Login Docker Hub
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
+
+                // Debug: kiểm tra image đã tồn tại
+                sh "docker images | grep ${IMAGE_NAME}"
+
+                // Push image lên Docker Hub
+                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker push ${IMAGE_NAME}:latest"
             }
         }
     }
 
     post {
         always {
+            // Cleanup docker để tránh quá nhiều image/container
             sh 'docker system prune -f || true'
             sh 'docker container prune -f || true'
         }
