@@ -1,88 +1,88 @@
-pipeline {
-    agent any
-
-    environment {
-        IMAGE_NAME = 'nguyentuong/demoqlda'
-        IMAGE_TAG = "${BUILD_NUMBER}"
-        RENDER_DEPLOY_HOOK = 'https://api.render.com/deploy/srv-d2ps28l6ubrc73cmmd60?key=zhkcOf9zjAM'
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                // Checkout source code từ GitHub
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: 'main']],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
-                    ]]
-                ])
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                dir('MuonTraSach') {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
-                }
-            }
-        }
-
-        stage('Test Application') {
-            steps {
-                dir('MuonTraSach') {
-                    sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover -s MuonTraSach/tests"
-                }
-            }
-        }
-
-        stage('Docker Login & Push') {
-            when {
-                expression { 
-                    return env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'origin/main' 
-                }
-            }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    // Login Docker Hub
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                }
-
-                // Debug: kiểm tra image đã tồn tại
-                sh "docker images | grep ${IMAGE_NAME}"
-
-                // Push image lên Docker Hub
-                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker push ${IMAGE_NAME}:latest"
-            }
-        }
-
-        stage('Trigger Render Deploy') {
-            when {
-                expression { 
-                    return env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'origin/main' 
-                }
-            }
-            steps {
-                echo "Triggering Render deploy via Deploy Hook..."
-                sh "curl -X POST ${RENDER_DEPLOY_HOOK}"
-            }
-        }
-    }
-
-    post {
-        always {
-            // Cleanup docker để tránh quá nhiều image/container
-            sh 'docker system prune -f || true'
-            sh 'docker container prune -f || true'
-        }
-        success {
-            echo '✅ Pipeline completed successfully!'
-        }
-        failure {
-            echo '❌ Pipeline failed!'
-        }
-    }
-}
+// pipeline {
+//     agent any
+//
+//     environment {
+//         IMAGE_NAME = 'nguyentuong/demoqlda'
+//         IMAGE_TAG = "${BUILD_NUMBER}"
+//         RENDER_DEPLOY_HOOK = 'https://api.render.com/deploy/srv-d2ps28l6ubrc73cmmd60?key=zhkcOf9zjAM'
+//     }
+//
+//     stages {
+//         stage('Checkout') {
+//             steps {
+//                 // Checkout source code từ GitHub
+//                 checkout([
+//                     $class: 'GitSCM',
+//                     branches: [[name: 'main']],
+//                     userRemoteConfigs: [[
+//                         url: 'https://github.com/Tuongtapcode/DemoQLDA.git'
+//                     ]]
+//                 ])
+//             }
+//         }
+//
+//         stage('Build Docker Image') {
+//             steps {
+//                 dir('MuonTraSach') {
+//                     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+//                     sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+//                 }
+//             }
+//         }
+//
+//         stage('Test Application') {
+//             steps {
+//                 dir('MuonTraSach') {
+//                     sh "docker run --rm ${IMAGE_NAME}:${IMAGE_TAG} python -m unittest discover -s MuonTraSach/tests"
+//                 }
+//             }
+//         }
+//
+//         stage('Docker Login & Push') {
+//             when {
+//                 expression {
+//                     return env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'origin/main'
+//                 }
+//             }
+//             steps {
+//                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+//                     // Login Docker Hub
+//                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+//                 }
+//
+//                 // Debug: kiểm tra image đã tồn tại
+//                 sh "docker images | grep ${IMAGE_NAME}"
+//
+//                 // Push image lên Docker Hub
+//                 sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+//                 sh "docker push ${IMAGE_NAME}:latest"
+//             }
+//         }
+//
+//         stage('Trigger Render Deploy') {
+//             when {
+//                 expression {
+//                     return env.BRANCH_NAME == 'main' || env.GIT_BRANCH == 'origin/main'
+//                 }
+//             }
+//             steps {
+//                 echo "Triggering Render deploy via Deploy Hook..."
+//                 sh "curl -X POST ${RENDER_DEPLOY_HOOK}"
+//             }
+//         }
+//     }
+//
+//     post {
+//         always {
+//             // Cleanup docker để tránh quá nhiều image/container
+//             sh 'docker system prune -f || true'
+//             sh 'docker container prune -f || true'
+//         }
+//         success {
+//             echo '✅ Pipeline completed successfully!'
+//         }
+//         failure {
+//             echo '❌ Pipeline failed!'
+//         }
+//     }
+// }
